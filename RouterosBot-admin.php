@@ -182,7 +182,7 @@ $message = $updateArray["message"]["text"];
 
 # این if برای بررسی ChatID قرار داده شده که مبادا شخصی که نباید دسترسی داشته باشه از بات تلگرام استفاده کنه. 
 # جهت استفاده، خط بعدی را به همراه else در پایان کد از حالت کامنت خارج کنید
-#if ($chatId == "347864963" || $chatId == "6560796514") {
+#if ($chatId == "YOURE first ChatID" || $chatId == "YOURE Second ChatID") {
 
 // ایجاد اتصال به پایگاه داده
 $conn = new mysqli($servername, $dbuser, $dbpass, $dbname);
