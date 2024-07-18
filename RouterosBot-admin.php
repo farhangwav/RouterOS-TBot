@@ -173,55 +173,56 @@ return ("بسته این کاربر درحالت رزرو قرار دارد و �
 }
 
 
-// دریافت ورودی JSON از تلگرام
+// Receive JSON input from Telegram
 $update = file_get_contents("php://input");
 $updateArray = json_decode($update, true);
 
+// Gathering Sender ChatID and Message
 $chatId = $updateArray["message"]["chat"]["id"];
 $message = $updateArray["message"]["text"];
 
-# این if برای بررسی ChatID قرار داده شده که مبادا شخصی که نباید دسترسی داشته باشه از بات تلگرام استفاده کنه. 
-# جهت استفاده، خط بعدی را به همراه else در پایان کد از حالت کامنت خارج کنید
-#if ($chatId == "YOURE first ChatID" || $chatId == "YOURE Second ChatID") {
+# Security acction: 
+# Uncomment it if you want to have conversation with bot with only specific ChatIDs
+# if ($chatId == "YOURE first ChatID" || $chatId == "YOURE Second ChatID") {
 
-// ایجاد اتصال به پایگاه داده
+// Connectin to DB
 $conn = new mysqli($servername, $dbuser, $dbpass, $dbname);
 
-// بررسی اتصال
+// Checking the connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
 $userState = getUserState($chatId, $conn);
 
-// مدیریت وضعیت‌ها با استفاده از switch
+// switch: Checking and Updating UserState every single time
 switch ($userState['state']) {
     case null:
-        // مرحله ۱: ارائه دو گزینه به کاربر
+        // Step1: User choosing option 1 or 2
         sendInitialOptions($chatId, $apiBaseUrl);
         setUserState($chatId, 'awaiting_option', null, $conn);
         break;
 
     case 'awaiting_option':
-        // مرحله ۲: دریافت گزینه و درخواست نام کاربری
+        // Step1: Getting the UserName
         if ($message === 'تمدید') {
-            file_get_contents("$apiBaseUrl/sendMessage?chat_id=$chatId&text=کدوم یوزر رو تمدید کنم؟");
+            file_get_contents("$apiBaseUrl/sendMessage?chat_id=$chatId&text=Pls Enter The User Name to ");
 
             setUserState($chatId, 'awaiting_username_option_1', null, $conn);
         } elseif ($message === 'استعلام') {
-            file_get_contents("$apiBaseUrl/sendMessage?chat_id=$chatId&text=کدوم یوزر رو استعلام کنم؟");
+            file_get_contents("$apiBaseUrl/sendMessage?chat_id=$chatId&text=Pls Enter The User Name");
             setUserState($chatId, 'awaiting_username_option_2', null, $conn);
         }
         break;
 
     case 'awaiting_username_option_1':
-        // مرحله ۳: دریافت نام کاربری و درخواست عدد
+        // Option1/Step3: getting Package Name
         setUserState($chatId, 'awaiting_number', $message, $conn);
-        file_get_contents("$apiBaseUrl/sendMessage?chat_id=$chatId&text=پکیج چند گیگ؟");
+        file_get_contents("$apiBaseUrl/sendMessage?chat_id=$chatId&text=Pls Enter the Package Name");
         break;
 
     case 'awaiting_number':
-        // مرحله ۴: دریافت عدد و نمایش نام کاربری و عدد
+        // Option1/Step4: Reseting the user statistics and adding package to it
         $userName = $userState['username'];
         $package = $message;
 
@@ -237,23 +238,25 @@ switch ($userState['state']) {
 
     
                 // Reset User Statistics
-                sendCommandToMikrotik($API, "/user-manager/user/remove", ["numbers" => "$id"]);
-                sendCommandToMikrotik($API, "/user-manager/user/add", ["name" => "$userName", "password" => "$userPassword", "shared-users" => "$sharedUsers" ]);
+                // In Mikrotik UserManager we have to delete the user and create it again to reset the users statistics, so be it:
+                sendCommandToMikrotik($API, "/user-manager/user/remove", ["numbers" => "$id"]); # removing the user
+                sendCommandToMikrotik($API, "/user-manager/user/add", ["name" => "$userName", "password" => "$userPassword", "shared-users" => "$sharedUsers" ]); # recreating the user by gathered information before deleting
                 sendMessageToTelegram("$userName Reset was successful!", $chatId);
 
                 // User Profile Query
-                $result = sendCommandToMikrotik($API, "/user-manager/user-profile/add", ["user" => "$userName", "profile" => "1 Mounth $package GB"]);
-                if (strpos($result, '"!trap"') !== false) {
-                    // اگر حاوی خطاست
+                $result = sendCommandToMikrotik($API, "/user-manager/user-profile/add", ["user" => "$userName", "profile" => "$package"]);
+                
+                if (strpos($result, '"!trap"') !== false) { // If there is no package named as $package, Error comes out
+                    
                     sendMessageToTelegram("Error activating Package!", $chatId);
-                    // استخراج پیام خطا
+                    // by uncommenting the following codes, we can have the error log in resonse to the bot
                     #preg_match('/"message":\s*"([^"]+)"/', $result, $matches);
                     #if (isset($matches[1])) {
                     #    sendMessageToTelegram("Error Message: $matches[1]", $chatId);
                     #}
-                } else {
-                    // اگر حاوی خطا نیست
-                    sendMessageToTelegram("Package 1 Mounth $package GB successfully added to user $userName ", $chatId);
+                } else { // If The package name is correct:
+
+                    sendMessageToTelegram("Package $package successfully added to user $userName ", $chatId);
                 }
             } else {
                 sendMessageToTelegram("User not found", $chatId);
@@ -263,13 +266,13 @@ switch ($userState['state']) {
             sendMessageToTelegram("Unable to connect to Mikrotik router.", $chatId);
         }
 
-        // بازگشت به مرحله ۱
+        // return to Step1
         sendInitialOptions($chatId, $apiBaseUrl);
         setUserState($chatId, 'awaiting_option', null, $conn);
         break;
 
     case 'awaiting_username_option_2':
-        // مرحله ۳: دریافت نام کاربری 
+        // Option2/Step3: getting username
         $API = new RouterosAPI();
         if ($API->connect($mikrotikIp, $mikrotikUser, $mikrotikPassword)) {
             $userName = $message;
@@ -290,7 +293,7 @@ switch ($userState['state']) {
                     $sharedUser = $responseArray[0]["shared-users"];
                     $activeSessions = $responseArray2[0]["active-sessions"];
 
-                    $messageToTelegram = "$sharedUser کاربره\n"."تعداد کاربر درحال استفاده: $activeSessions\n"."$usageMessage"."$timeLeftMessage"."\nآی‌دی تلگرام ادمین:\n@GSvpn_admin";
+                    $messageToTelegram = "$sharedUser Shared-Users\n"."Active accounts right now: $activeSessions\n"."$usageMessage"."$timeLeftMessage"."\n";
 
                     sendMessageToTelegram($messageToTelegram, $chatId);
 
@@ -301,13 +304,13 @@ switch ($userState['state']) {
         } else {
             sendMessageToTelegram("Unable to connect to Mikrotik router.", $chatId);
         }
-        // بازگشت به مرحله ۱
+        // return to Step1
         sendInitialOptions($chatId, $apiBaseUrl);
         setUserState($chatId, 'awaiting_option', null, $conn);
         break;
 }
 
-// بستن اتصال به پایگاه داده
+// Closing the database connection
 $conn->close();
 
 #} else {
