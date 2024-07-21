@@ -118,37 +118,37 @@ function showUsage($responseArray2) {
       $total_remainig = 10737418240-$total_used;
       $total_remainigGB = $total_remainig / 1073741824;
       $total_remainigGB_text = number_format($total_remainigGB, 2);
-      return ("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n"."باقیمانده حجم بسته فعلی:  $total_remainigGB_text گیگابایت\n");
+      return ("Download Usage:  $downloadGB_text GB\n"."Upload Usage:  $uploadGB_text GB\n"."Total Used:  $total_usedGB_text GB\n");
   } else if($responseArray2[0]["actual-profile"]== "1 Mounth 20 GB"){
       $total_remainig = 21474836480-$total_used;
       $total_remainigGB = $total_remainig / 1073741824;
       $total_remainigGB_text = number_format($total_remainigGB, 2);
-      return ("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n"."باقیمانده حجم بسته فعلی:  $total_remainigGB_text گیگابایت\n");
+      return ("Download Usage:  $downloadGB_text GB\n"."Upload Usage:  $uploadGB_text GB\n"."Total Used:  $total_usedGB_text GB\n");
   } else if($responseArray2[0]["actual-profile"]== "1 Mounth 40 GB"){
       $total_remainig = 42949672960-$total_used;
       $total_remainigGB = $total_remainig / 1073741824;
       $total_remainigGB_text = number_format($total_remainigGB, 2);
-      return ("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n"."باقیمانده حجم بسته فعلی:  $total_remainigGB_text گیگابایت\n");
+      return ("Download Usage:  $downloadGB_text GB\n"."Upload Usage:  $uploadGB_text GB\n"."Total Used:  $total_usedGB_text GB\n");
   } else if($responseArray2[0]["actual-profile"]== "1 Mounth 50 GB"){
       $total_remainig = 53687091200-$total_used;
       $total_remainigGB = $total_remainig / 1073741824;
       $total_remainigGB_text = number_format($total_remainigGB, 2);
-      return ("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n"."باقیمانده حجم بسته فعلی:  $total_remainigGB_text گیگابایت\n");
+      return ("Download Usage:  $downloadGB_text GB\n"."Upload Usage:  $uploadGB_text GB\n"."Total Used:  $total_usedGB_text GB\n");
   } else if($responseArray2[0]["actual-profile"]== "1 Mounth 80 GB"){
       $total_remainig = 85899345920-$total_used;
       $total_remainigGB = $total_remainig / 1073741824;
       $total_remainigGB_text = number_format($total_remainigGB, 2);
-      return ("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n"."باقیمانده حجم بسته فعلی:  $total_remainigGB_text گیگابایت\n");
+      return ("Download Usage:  $downloadGB_text GB\n"."Upload Usage:  $uploadGB_text GB\n"."Total Used:  $total_usedGB_text GB\n");
   } else if($responseArray2[0]["actual-profile"]== "1 Mounth 100 GB"){
       $total_remainig = 107374182400-$total_used;
       $total_remainigGB = $total_remainig / 1073741824;
       $total_remainigGB_text = number_format($total_remainigGB, 2);
-      return ("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n"."باقیمانده حجم بسته فعلی:  $total_remainigGB_text گیگابایت\n");
+      return ("Download Usage:  $downloadGB_text GB\n"."Upload Usage:  $uploadGB_text GB\n"."Total Used:  $total_usedGB_text GB\n");
   } else if($responseArray2[0]["actual-profile"]== "user_test"){
       $total_remainig = 1073741824-$total_used;
       $total_remainigGB = $total_remainig / 1073741824;
       $total_remainigGB_text = number_format($total_remainigGB, 2);
-      return ("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n"."باقیمانده حجم بسته فعلی:  $total_remainigGB_text گیگابایت\n");
+      return ("Download Usage:  $downloadGB_text GB\n"."Upload Usage:  $uploadGB_text GB\n"."Total Used:  $total_usedGB_text GB\n");
   } else if($responseArray2[0]["actual-profile"]== "unlimit"){
       return ("Unlimited Profile");
   } else {
