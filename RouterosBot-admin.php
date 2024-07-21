@@ -30,7 +30,7 @@ $dbname = "dbname";
 *
 */
 
-// تابع برای خواندن وضعیت کاربر از پایگاه داده
+// Function to read User state from database
 function getUserState($chatId, $conn) {
     $stmt = $conn->prepare("SELECT state, username FROM user_states WHERE chat_id = ?");
     $stmt->bind_param("i", $chatId);
@@ -41,7 +41,7 @@ function getUserState($chatId, $conn) {
     return ['state' => $state, 'username' => $username];
 }
 
-// تابع برای ذخیره وضعیت کاربر در پایگاه داده
+// Function to save User state to database
 function setUserState($chatId, $state, $username, $conn) {
     $stmt = $conn->prepare("REPLACE INTO user_states (chat_id, state, username) VALUES (?, ?, ?)");
     $stmt->bind_param("iss", $chatId, $state, $username);
@@ -49,11 +49,11 @@ function setUserState($chatId, $state, $username, $conn) {
     $stmt->close();
 }
 
-// تابع برای ارسال پیام با کیبورد سفارشی
+// Keyboard Function
 function sendInitialOptions($chatId, $apiBaseUrl) {
     $replyMarkup = [
         'keyboard' => [
-            [['text' => 'تمدید'], ['text' => 'استعلام']]
+            [['text' => 'revival'], ['text' => 'inquiry']]
         ],
         'resize_keyboard' => true,
         'one_time_keyboard' => true
@@ -72,7 +72,7 @@ function sendMessageToTelegram($message, $chatId) {
     $url = "https://api.telegram.org/bot$botToken/sendMessage";
     $maxLength = 4096;
 
-    // تقسیم پیام به بخش‌های کوچکتر
+    // Split the Message to suitable parts for Telegram
     $messageParts = str_split($message, $maxLength);
 
     foreach ($messageParts as $part) {
@@ -93,66 +93,66 @@ function sendMessageToTelegram($message, $chatId) {
 }
 
 function showUsage($responseArray2) {
-    //اندازه گیری مقدار دانلود
+    //Calculating Downloads
   $download = $responseArray2[0]["total-download"];
-  $download_number = floatval($download); // تبدیل رشته به عدد
-  $downloadGB = $download_number / 1073741824; // انجام عملیات تقسیم
-  $downloadGB_text = number_format($downloadGB, 2); // تبدیل نتیجه به رشته
-  #sendMessageToTelegram("مقدار مصرف(دانلود):\n$downloadGB_text گیگابایت");
+  $download_number = floatval($download); // String to integer
+  $downloadGB = $download_number / 1073741824; // Bytes to GigaBytes
+  $downloadGB_text = number_format($downloadGB, 2); // Result to String
+  #sendMessageToTelegram("Download Usages:\n$downloadGB_text GB");
 
-  //اندازه گیری مقدار آپلود
+  //Calculating Uploads
   $upload= $responseArray2[0]["total-upload"];
-  $upload_number = floatval($upload); // تبدیل رشته به عدد
-  $uploadGB = $upload_number / 1073741824; // انجام عملیات تقسیم
-  $uploadGB_text = number_format($uploadGB, 2); // تبدیل نتیجه به رشته
+  $upload_number = floatval($upload);
+  $uploadGB = $upload_number / 1073741824;
+  $uploadGB_text = number_format($uploadGB, 2);
 
-  //اندازه گیری مقدار کل مصرف
+  //Calculating Overall Usage
   $total_used = $upload_number + $download_number;
-  $total_usedGB = $total_used / 1073741824; // انجام عملیات تقسیم
-  $total_usedGB_text = number_format($total_usedGB, 2); // تبدیل نتیجه به رشته
+  $total_usedGB = $total_used / 1073741824;
+  $total_usedGB_text = number_format($total_usedGB, 2);
 
-  #sendMessageToTelegram("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n");
+  #sendMessageToTelegram("Download Usage:  $downloadGB_text GB\n"."Upload Usage:  $uploadGB_text GB\n"."Total Used:  $total_usedGB_text GB\n");
 
-  //اندازه گیری و نمایش باقیمانده
+  //Calculating remaining GigaBytes base on the user Package
   if($responseArray2[0]["actual-profile"]=="1 Mounth 10 GB"){
       $total_remainig = 10737418240-$total_used;
-      $total_remainigGB = $total_remainig / 1073741824; // انجام عملیات تقسیم
-      $total_remainigGB_text = number_format($total_remainigGB, 2); // تبدیل نتیجه به رشته
+      $total_remainigGB = $total_remainig / 1073741824;
+      $total_remainigGB_text = number_format($total_remainigGB, 2);
       return ("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n"."باقیمانده حجم بسته فعلی:  $total_remainigGB_text گیگابایت\n");
   } else if($responseArray2[0]["actual-profile"]== "1 Mounth 20 GB"){
       $total_remainig = 21474836480-$total_used;
-      $total_remainigGB = $total_remainig / 1073741824; // انجام عملیات تقسیم
-      $total_remainigGB_text = number_format($total_remainigGB, 2); // تبدیل نتیجه به رشته
+      $total_remainigGB = $total_remainig / 1073741824;
+      $total_remainigGB_text = number_format($total_remainigGB, 2);
       return ("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n"."باقیمانده حجم بسته فعلی:  $total_remainigGB_text گیگابایت\n");
   } else if($responseArray2[0]["actual-profile"]== "1 Mounth 40 GB"){
       $total_remainig = 42949672960-$total_used;
-      $total_remainigGB = $total_remainig / 1073741824; // انجام عملیات تقسیم
-      $total_remainigGB_text = number_format($total_remainigGB, 2); // تبدیل نتیجه به رشته
+      $total_remainigGB = $total_remainig / 1073741824;
+      $total_remainigGB_text = number_format($total_remainigGB, 2);
       return ("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n"."باقیمانده حجم بسته فعلی:  $total_remainigGB_text گیگابایت\n");
   } else if($responseArray2[0]["actual-profile"]== "1 Mounth 50 GB"){
       $total_remainig = 53687091200-$total_used;
-      $total_remainigGB = $total_remainig / 1073741824; // انجام عملیات تقسیم
-      $total_remainigGB_text = number_format($total_remainigGB, 2); // تبدیل نتیجه به رشته
+      $total_remainigGB = $total_remainig / 1073741824;
+      $total_remainigGB_text = number_format($total_remainigGB, 2);
       return ("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n"."باقیمانده حجم بسته فعلی:  $total_remainigGB_text گیگابایت\n");
   } else if($responseArray2[0]["actual-profile"]== "1 Mounth 80 GB"){
       $total_remainig = 85899345920-$total_used;
-      $total_remainigGB = $total_remainig / 1073741824; // انجام عملیات تقسیم
-      $total_remainigGB_text = number_format($total_remainigGB, 2); // تبدیل نتیجه به رشته
+      $total_remainigGB = $total_remainig / 1073741824;
+      $total_remainigGB_text = number_format($total_remainigGB, 2);
       return ("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n"."باقیمانده حجم بسته فعلی:  $total_remainigGB_text گیگابایت\n");
   } else if($responseArray2[0]["actual-profile"]== "1 Mounth 100 GB"){
       $total_remainig = 107374182400-$total_used;
-      $total_remainigGB = $total_remainig / 1073741824; // انجام عملیات تقسیم
-      $total_remainigGB_text = number_format($total_remainigGB, 2); // تبدیل نتیجه به رشته
+      $total_remainigGB = $total_remainig / 1073741824;
+      $total_remainigGB_text = number_format($total_remainigGB, 2);
       return ("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n"."باقیمانده حجم بسته فعلی:  $total_remainigGB_text گیگابایت\n");
   } else if($responseArray2[0]["actual-profile"]== "user_test"){
       $total_remainig = 1073741824-$total_used;
-      $total_remainigGB = $total_remainig / 1073741824; // انجام عملیات تقسیم
-      $total_remainigGB_text = number_format($total_remainigGB, 2); // تبدیل نتیجه به رشته
+      $total_remainigGB = $total_remainig / 1073741824;
+      $total_remainigGB_text = number_format($total_remainigGB, 2);
       return ("مقدار مصرف(دانلود):  $downloadGB_text گیگابایت\n"."مقدار مصرف(آپلود):  $uploadGB_text گیگابایت\n"."مقدار کل مصرف:  $total_usedGB_text گیگابایت\n"."باقیمانده حجم بسته فعلی:  $total_remainigGB_text گیگابایت\n");
   } else if($responseArray2[0]["actual-profile"]== "unlimit"){
       return ("Unlimited Profile");
   } else {
-      return ("این کاربر درحال حاضر بسته فعالی ندارید\n");
+      return ("No Active Package\n");
   }
 }
 
@@ -160,15 +160,15 @@ function showTimeLeft($responseArray3){
 $endTime = $responseArray3[0]["end-time"];
 $state = $responseArray3[0]["state"];
 if($state== "running-active"){
-return ("تاریخ سررسید بسته‌ فعلی این کاربر:\n$endTime");
+return ("UserPackage Expire Date:\n$endTime");
 
 
 } else if($state== "running"){
-return ("میزان مصرف حجمی بسته این کاربر به پایان رسیده و جهت استفاده از سرویس GSVPN می‌بایست بسته جدید تهیه فرمائید\nدرصورت تمایل به تمدید سرویس خود لطفا با ادمین در ارتباط باشید");
+return ("Maximum bandwith used");
 } else if($state== "used"){
-return ("مهلت استفاده بسته این کاربر به پایان رسیده و جهت استفاده از سرویس GSVPN می‌بایست بسته جدید تهیه فرمائید\nدرصورت تمایل به تمدید سرویس خود لطفا با ادمین در ارتباط باشید");
+return ("Package Expired");
 } else if($state== "waiting"){
-return ("بسته این کاربر درحالت رزرو قرار دارد و به محض اولین اتصال بسته فعال خواهد شد");
+return ("Package is reseved and ready to be used");
 }
 }
 
@@ -205,11 +205,11 @@ switch ($userState['state']) {
 
     case 'awaiting_option':
         // Step1: Getting the UserName
-        if ($message === 'تمدید') {
+        if ($message === 'revival') {
             file_get_contents("$apiBaseUrl/sendMessage?chat_id=$chatId&text=Pls Enter The User Name to ");
 
             setUserState($chatId, 'awaiting_username_option_1', null, $conn);
-        } elseif ($message === 'استعلام') {
+        } elseif ($message === 'inquiry') {
             file_get_contents("$apiBaseUrl/sendMessage?chat_id=$chatId&text=Pls Enter The User Name");
             setUserState($chatId, 'awaiting_username_option_2', null, $conn);
         }
